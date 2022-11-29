@@ -13,6 +13,7 @@ type tape rune
 type input rune
 
 type trans struct {
+	t  *trans
 	is state     //initial state
 	it tape      //inital tape character
 	d  direction //left or right
@@ -30,16 +31,20 @@ type tm struct {
 	final    []state
 }
 
-func createTM() *tm {
+func createTM(as []state, in []input, ts []tape, le tape, trns []trans, st state, fnl []state) *tm {
 	newTM := new(tm)
-	newTM.states = []state{}
-	newTM.inputs = []input{}
-	newTM.tapesyms = []tape{}
-	newTM.trans = []trans{}
-	newTM.final = []state{}
+	newTM.states = as
+	newTM.inputs = in
+	newTM.tapesyms = ts
+	newTM.leftend = le
+	newTM.trans = trns
+	newTM.start = st
+	newTM.final = fnl
 	return newTM
 }
 
 func main() {
-	fmt.Println("hello")
+	//tripletm := tm{nil, "abc", "abc*! ", ' ', '!', 5, 1, []int{6}}
+	tripletm := createTM([]state{1: 6}, []input{'a', 'b', 'c'}, []tape{'a', 'b', 'c', '*', '!', ' '}, '!', nil, 1, []state{6})
+	fmt.Println(tripletm)
 }
