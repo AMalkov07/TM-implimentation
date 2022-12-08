@@ -3,8 +3,8 @@ package main
 import "fmt"
 
 const (
-	goLeft = iota
-	goRight
+	moveLeft = iota
+	moveRight
 )
 
 type direction int
@@ -13,7 +13,7 @@ type tape rune
 type input rune
 
 type trans struct {
-	t  *trans
+	//t  *trans
 	is state     //initial state
 	it tape      //inital tape character
 	d  direction //left or right
@@ -25,17 +25,19 @@ type tm struct {
 	states   []state
 	inputs   []input
 	tapesyms []tape
+	blank    tape
 	leftend  tape
 	trans    []trans
 	start    state
 	final    []state
 }
 
-func createTM(as []state, in []input, ts []tape, le tape, trns []trans, st state, fnl []state) *tm {
+func createTM(as []state, in []input, ts []tape, bl tape, le tape, trns []trans, st state, fnl []state) *tm {
 	newTM := new(tm)
 	newTM.states = as
 	newTM.inputs = in
 	newTM.tapesyms = ts
+	newTM.blank = bl
 	newTM.leftend = le
 	newTM.trans = trns
 	newTM.start = st
@@ -43,8 +45,81 @@ func createTM(as []state, in []input, ts []tape, le tape, trns []trans, st state
 	return newTM
 }
 
+type config struct {
+	currentState state
+	blank        tape
+	lefttrev     []tape
+	right        []tape
+}
+
+type configs []config
+
+func (c config) shiftConfig(d direction) config {
+	if d == moveLeft {
+		return config{c.currentState, c.blank, append([]tape{c.right[0]}, c.lefttrev...), c.right[1:]} //possible this line can cause problems
+	}
+	return config{c.currentState, c.blank, c.lefttrev[1:], append([]tape{c.lefttrev[0]}, c.right...)} //possible this line can cause problems
+}
+
+//not sure if this function is correct
+func (c config) updateConfig(s state, t tape, d direction) config {
+	newConfig := config{s, c.blank, append([]tape{t}, c.lefttrev[1:]...), c.right}
+	return newConfig.shiftConfig(d)
+}
+
+/*func (t tm) newConfig(c config) configs {
+}*/
+
+func (t tm) initialConfig(inputString []tape) config { //changed type input to type tape
+	return config{t.start, t.blank, []tape{inputString[0], t.leftend}, inputString[1:]} // haskel version uses an infinite length slice, mine doesn't
+}
+
+func goRight(initialState state, initialTape tape, newTape tape, newState state) trans {
+	return trans{initialState, initialTape, moveRight, newState, newTape}
+}
+
+func checkRight(initialState state, initialTape tape, newState state) trans {
+	return goRight(initialState, initialTape, initialTape, newState)
+}
+
+func goLeft(initialState state, initialTape tape, newTape tape, newState state) trans {
+	return trans{initialState, initialTape, moveLeft, newState, newTape}
+}
+
+func checkLeft(initialState state, initialTape tape, newState state) trans {
+	return goLeft(initialState, initialTape, initialTape, newState)
+}
+
+func loop(d direction, st state, tapes []tape) []trans {
+	output := []trans{}
+	for _, val := range tapes {
+		output = append(output, trans{st, val, d, st, val})
+	}
+	return output
+}
+
+func loopRight(st state, tapes []tape) []trans {
+	return loop(moveRight, st, tapes)
+}
+
+func loopLeft(st state, tapes []tape) []trans {
+	return loop(moveLeft, st, tapes)
+}
+
 func main() {
-	//tripletm := tm{nil, "abc", "abc*! ", ' ', '!', 5, 1, []int{6}}
-	tripletm := createTM([]state{1: 6}, []input{'a', 'b', 'c'}, []tape{'a', 'b', 'c', '*', '!', ' '}, '!', nil, 1, []state{6})
+	transitions := []trans{}
+	transitions = append(transitions, checkRight(1, ' ', 6))
+	transitions = append(transitions, loopRight(1, []tape{'*'})...)
+	transitions = append(transitions, goRight(1, 'a', '*', 2))
+	transitions = append(transitions, loopRight(2, []tape{'a', '*'})...)
+	transitions = append(transitions, goRight(2, 'b', '*', 3))
+	transitions = append(transitions, loopRight(3, []tape{'b', '*'})...)
+	transitions = append(transitions, goRight(3, 'c', '*', 4))
+	transitions = append(transitions, loopRight(4, []tape{'c', '*'})...)
+	transitions = append(transitions, checkLeft(4, ' ', 5))
+	transitions = append(transitions, loopLeft(5, []tape{'a', 'b', 'c', '*'})...)
+	transitions = append(transitions, checkRight(5, '!', 1))
+
+	tripletm := createTM([]state{1: 6}, []input{'a', 'b', 'c'}, []tape{'a', 'b', 'c', '*', '!', ' '}, ' ', '!', transitions, 1, []state{6})
 	fmt.Println(tripletm)
 }
