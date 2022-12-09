@@ -87,8 +87,32 @@ func (t tm) initialConfig(inputString []tape) config { //changed type input to t
 	return config{t.start, t.blank, []tape{t.leftend, inputString[0]}, inputString[1:]} // haskel version uses an infinite length slice, mine doesn't
 }
 
-/*func (t tm) configsLazy(inputString []tape) history {
-}*/
+func (t tm) configsLazy(n int, inputString []tape) history {
+	var output history
+	configsStack := configs{t.initialConfig(inputString)}
+	output = append(output, configsStack)
+	for i := 0; i < n; i++ {
+		if len(configsStack) == 0 {
+			break
+		}
+		/*for _, element := range configsStack[0] {
+			tmpConfig := t.newConfig(element)
+			if len(tmpConfig) != 0 {
+				configsStack = append(configsStack, tmpConfig)
+			}
+		}*/
+
+		configsStack = append(configsStack, t.newConfig(configsStack[0])...)
+		configsStack = configsStack[1:]
+		output = append(output, configsStack)
+	}
+	return output
+}
+
+func (t tm) configs(n int, inputString []tape) history {
+	return t.configsLazy(n, inputString)
+
+}
 
 func goRight(initialState state, initialTape tape, newTape tape, newState state) trans {
 	return trans{initialState, initialTape, moveRight, newState, newTape}
@@ -126,8 +150,8 @@ func main() {
 	transitions := []trans{}
 	transitions = append(transitions, checkRight(1, ' ', 6))
 	transitions = append(transitions, loopRight(1, []tape{'*'})...)
-	//transitions = append(transitions, goRight(1, 'a', '?', 3)) // added for testing
 	transitions = append(transitions, goRight(1, 'a', '*', 2))
+	transitions = append(transitions, goRight(1, 'a', '?', 3)) // added for testing
 	transitions = append(transitions, loopRight(2, []tape{'a', '*'})...)
 	transitions = append(transitions, goRight(2, 'b', '*', 3))
 	transitions = append(transitions, loopRight(3, []tape{'b', '*'})...)
@@ -139,10 +163,14 @@ func main() {
 
 	tripletm := createTM([]state{1: 6}, []input{'a', 'b', 'c'}, []tape{'a', 'b', 'c', '*', '!', ' '}, ' ', '!', transitions, 1, []state{6})
 
-	ic := tripletm.initialConfig([]tape{'a', 'b', 'c'})
-	fmt.Println(ic)
+	//ic := tripletm.initialConfig([]tape{'a', 'b', 'c'})
+	//fmt.Println(ic)
 	//uc := ic.updateConfig(2, '*', moveRight).updateConfig(3, 'b', moveRight).updateConfig(4, '*', moveRight)
-	nc := tripletm.newConfig(ic)
-	fmt.Println(nc)
+	//nc := tripletm.newConfig(ic)
+	//fmt.Println(nc)
+	x := tripletm.configs(35, []tape{'a', 'a', 'b', 'b', 'c', 'c'})
+	for _, val := range x {
+		fmt.Println(val)
+	}
 
 }
