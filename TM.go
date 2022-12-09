@@ -45,6 +45,47 @@ func createTM(as []state, in []input, ts []tape, bl tape, le tape, trns []trans,
 	return newTM
 }
 
+func (tr trans) showTransition() {
+	var tmp rune
+	if tr.d == 0 {
+		tmp = 'L'
+	} else {
+		tmp = 'R'
+	}
+
+	fmt.Printf("  %v === '%v' / '%v' %c ===> %v\n", tr.is, tr.it, tr.nt, tmp, tr.ns)
+}
+
+func (t tm) showTM() {
+	fmt.Println("States:", t.states)
+	fmt.Printf("Alphabet: %c\n", t.inputs)
+	fmt.Printf("Tape symbols: %c\n", t.tapesyms)
+	fmt.Printf("Blank: '%c'\n", t.blank)
+	fmt.Printf("Leftend '%c'\n", t.leftend)
+	fmt.Println("Transitions:")
+	for _, tr := range t.trans {
+		tr.showTransition()
+	}
+	fmt.Printf("Start state: %v\n", t.start)
+	fmt.Printf("Final state: %v\n", t.final)
+}
+
+func (c config) showConfig() {
+	fmt.Printf("[%v: %c %c]", c.currentState, c.lefttrev, c.right)
+}
+
+func (h history) showHistory() {
+	for _, configs := range h {
+		fmt.Printf("[")
+		configs[0].showConfig()
+		for i := 1; i < len(configs); i++ {
+			fmt.Printf(",")
+			configs[i].showConfig()
+		}
+		fmt.Printf("]\n")
+	}
+}
+
 type config struct {
 	currentState state
 	blank        tape
@@ -103,16 +144,32 @@ func (t tm) configsLazy(inputString []tape) history {
 }
 
 func (t tm) configs(n int, inputString []tape) history {
-	output := make(history, n)
-	output = t.configsLazy(inputString)
+	output := t.configsLazy(inputString)[:n]
 	return output
-
 }
 
-func (t tm) accepts(inputString []tape) config {
-	var output config
+func (t tm) accepting(inputString []tape) config {
+	htmp := t.configsLazy(inputString)
+	for _, val := range htmp {
+		for _, val2 := range val {
+			for _, val3 := range t.final {
+				if val2.currentState == val3 {
+					return val2
+				}
+			}
+		}
+	}
+	return config{currentState: t.start}
+}
 
-	return output
+func (t tm) accepts(inputString []tape) bool {
+	for _, val := range t.final {
+		if val == t.start {
+			return true
+		}
+	}
+	x := t.accepting(inputString)
+	return x.currentState != t.start
 }
 
 func goRight(initialState state, initialTape tape, newTape tape, newState state) trans {
@@ -163,6 +220,9 @@ func main() {
 	transitions = append(transitions, checkRight(5, '!', 1))
 
 	tripletm := createTM([]state{1: 6}, []input{'a', 'b', 'c'}, []tape{'a', 'b', 'c', '*', '!', ' '}, ' ', '!', transitions, 1, []state{6})
+	//tripletm.showTM()
+	//x := tripletm.initialConfig([]tape{'a', 'a', 'b', 'b', 'c', 'c'})
+	//x.showConfig()
 
 	//ic := tripletm.initialConfig([]tape{'a', 'b', 'c'})
 	//fmt.Println(ic)
@@ -170,8 +230,11 @@ func main() {
 	//nc := tripletm.newConfig(ic)
 	//fmt.Println(nc)
 	x := tripletm.configs(35, []tape{'a', 'a', 'b', 'b', 'c', 'c'})
-	for _, val := range x {
+	x.showHistory()
+	//x := tripletm.accepting([]tape{'a', 'b', 'c'})
+	//fmt.Println(tripletm.accepts([]tape{'a', 'b', 'c'}))
+	/*for _, val := range x {
 		fmt.Println(val)
-	}
+	}*/
 
 }
