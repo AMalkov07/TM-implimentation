@@ -87,21 +87,14 @@ func (t tm) initialConfig(inputString []tape) config { //changed type input to t
 	return config{t.start, t.blank, []tape{t.leftend, inputString[0]}, inputString[1:]} // haskel version uses an infinite length slice, mine doesn't
 }
 
-func (t tm) configsLazy(n int, inputString []tape) history {
+func (t tm) configsLazy(inputString []tape) history {
 	var output history
 	configsStack := configs{t.initialConfig(inputString)}
 	output = append(output, configsStack)
-	for i := 0; i < n; i++ {
+	for {
 		if len(configsStack) == 0 {
 			break
 		}
-		/*for _, element := range configsStack[0] {
-			tmpConfig := t.newConfig(element)
-			if len(tmpConfig) != 0 {
-				configsStack = append(configsStack, tmpConfig)
-			}
-		}*/
-
 		configsStack = append(configsStack, t.newConfig(configsStack[0])...)
 		configsStack = configsStack[1:]
 		output = append(output, configsStack)
@@ -110,8 +103,16 @@ func (t tm) configsLazy(n int, inputString []tape) history {
 }
 
 func (t tm) configs(n int, inputString []tape) history {
-	return t.configsLazy(n, inputString)
+	output := make(history, n)
+	output = t.configsLazy(inputString)
+	return output
 
+}
+
+func (t tm) accepts(inputString []tape) config {
+	var output config
+
+	return output
 }
 
 func goRight(initialState state, initialTape tape, newTape tape, newState state) trans {
