@@ -53,26 +53,42 @@ type config struct {
 }
 
 type configs []config
+type history []configs
 
 func (c config) shiftConfig(d direction) config {
-	if d == moveLeft {
-		return config{c.currentState, c.blank, append([]tape{c.right[0]}, c.lefttrev...), c.right[1:]} //possible this line can cause problems
+	if d == moveRight {
+		if len(c.right) == 0 {
+			return config{c.currentState, c.blank, append(c.lefttrev, c.blank), c.right} //possible this line can cause problems
+		}
+		return config{c.currentState, c.blank, append(c.lefttrev, c.right[0]), c.right[1:]} //possible this line can cause problems
 	}
-	return config{c.currentState, c.blank, c.lefttrev[1:], append([]tape{c.lefttrev[0]}, c.right...)} //possible this line can cause problems
+	return config{c.currentState, c.blank, c.lefttrev[:len(c.lefttrev)-1], append([]tape{c.lefttrev[len(c.lefttrev)-1]}, c.right...)} //possible this line can cause problems
 }
 
 //not sure if this function is correct
 func (c config) updateConfig(s state, t tape, d direction) config {
-	newConfig := config{s, c.blank, append([]tape{t}, c.lefttrev[1:]...), c.right}
+	arrCopy := make([]tape, len(c.lefttrev))
+	copy(arrCopy, c.lefttrev)
+	newConfig := config{s, c.blank, append(arrCopy[:len(arrCopy)-1], t), c.right}
 	return newConfig.shiftConfig(d)
 }
 
-/*func (t tm) newConfig(c config) configs {
-}*/
+func (t tm) newConfig(c config) configs {
+	var output configs
+	for _, tr := range t.trans {
+		if tr.is == c.currentState && tr.it == c.lefttrev[len(c.lefttrev)-1] {
+			output = append(output, c.updateConfig(tr.ns, tr.nt, tr.d))
+		}
+	}
+	return output
+}
 
 func (t tm) initialConfig(inputString []tape) config { //changed type input to type tape
-	return config{t.start, t.blank, []tape{inputString[0], t.leftend}, inputString[1:]} // haskel version uses an infinite length slice, mine doesn't
+	return config{t.start, t.blank, []tape{t.leftend, inputString[0]}, inputString[1:]} // haskel version uses an infinite length slice, mine doesn't
 }
+
+/*func (t tm) configsLazy(inputString []tape) history {
+}*/
 
 func goRight(initialState state, initialTape tape, newTape tape, newState state) trans {
 	return trans{initialState, initialTape, moveRight, newState, newTape}
@@ -110,6 +126,7 @@ func main() {
 	transitions := []trans{}
 	transitions = append(transitions, checkRight(1, ' ', 6))
 	transitions = append(transitions, loopRight(1, []tape{'*'})...)
+	//transitions = append(transitions, goRight(1, 'a', '?', 3)) // added for testing
 	transitions = append(transitions, goRight(1, 'a', '*', 2))
 	transitions = append(transitions, loopRight(2, []tape{'a', '*'})...)
 	transitions = append(transitions, goRight(2, 'b', '*', 3))
@@ -121,5 +138,11 @@ func main() {
 	transitions = append(transitions, checkRight(5, '!', 1))
 
 	tripletm := createTM([]state{1: 6}, []input{'a', 'b', 'c'}, []tape{'a', 'b', 'c', '*', '!', ' '}, ' ', '!', transitions, 1, []state{6})
-	fmt.Println(tripletm)
+
+	ic := tripletm.initialConfig([]tape{'a', 'b', 'c'})
+	fmt.Println(ic)
+	//uc := ic.updateConfig(2, '*', moveRight).updateConfig(3, 'b', moveRight).updateConfig(4, '*', moveRight)
+	nc := tripletm.newConfig(ic)
+	fmt.Println(nc)
+
 }
