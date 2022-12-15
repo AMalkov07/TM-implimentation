@@ -16,11 +16,11 @@ func main() {
 		checkRight(5, '!', 1)}
 	transitions := combineArr(transitionsarr)
 	tripletm := createTM([]state{1: 6}, []input{'a', 'b', 'c'}, []tape{'a', 'b', 'c', '*', '!', ' '}, ' ', '!', transitions, 1, []state{6})
-	fmt.Println("showTM:")
+	fmt.Println("tripleTM showTM function test:")
 	tripletm.showTM()
 	input := []tape{'a', 'a', 'b', 'b', 'c', 'c'}
-	fmt.Println("showHistory:")
+	fmt.Println("\nshowHistory function test:")
 	tripletm.configs(35, input).showHistory()
-	fmt.Println("accepts:")
+	fmt.Println("\naccepts function test:")
 	tripletm.accepts(input)
 }
