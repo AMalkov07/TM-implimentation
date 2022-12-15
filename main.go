@@ -1,5 +1,7 @@
 package main
 
+import "fmt"
+
 func main() {
 	transitionsarr := [][]trans{checkRight(1, ' ', 6),
 		loopRight(1, []tape{'*'}),
@@ -14,6 +16,11 @@ func main() {
 		checkRight(5, '!', 1)}
 	transitions := combineArr(transitionsarr)
 	tripletm := createTM([]state{1: 6}, []input{'a', 'b', 'c'}, []tape{'a', 'b', 'c', '*', '!', ' '}, ' ', '!', transitions, 1, []state{6})
-	tripletm.configs(35, []tape{'a', 'a', 'b', 'b', 'c', 'c'}).showHistory()
-	tripletm.accepts([]tape{'a', 'a', 'b', 'b', 'c', 'c'})
+	fmt.Println("showTM:")
+	tripletm.showTM()
+	input := []tape{'a', 'a', 'b', 'b', 'c', 'c'}
+	fmt.Println("showHistory:")
+	tripletm.configs(35, input).showHistory()
+	fmt.Println("accepts:")
+	tripletm.accepts(input)
 }

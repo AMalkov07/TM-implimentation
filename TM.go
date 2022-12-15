@@ -53,7 +53,7 @@ func (tr trans) showTransition() {
 		tmp = 'R'
 	}
 
-	fmt.Printf("  %v === '%v' / '%v' %c ===> %v\n", tr.is, tr.it, tr.nt, tmp, tr.ns)
+	fmt.Printf("  %v === '%c' / '%c' %c ===> %v\n", tr.is, tr.it, tr.nt, tmp, tr.ns)
 }
 
 func (t tm) showTM() {
