@@ -15,3 +15,5 @@ main.go contains tests for the tripletm TM
 # Status
 I believe this is a fully functioning simulation for TM's
 
+I did the course evaluation
+
