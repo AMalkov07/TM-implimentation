@@ -175,7 +175,7 @@ func (t tm) accepts(inputString []tape) bool {
 }
 
 func goRight(initialState state, initialTape tape, newTape tape, newState state) []trans {
-	return []trans{trans{initialState, initialTape, moveRight, newState, newTape}}
+	return []trans{{initialState, initialTape, moveRight, newState, newTape}}
 }
 
 func checkRight(initialState state, initialTape tape, newState state) []trans {
@@ -183,7 +183,7 @@ func checkRight(initialState state, initialTape tape, newState state) []trans {
 }
 
 func goLeft(initialState state, initialTape tape, newTape tape, newState state) []trans {
-	return []trans{trans{initialState, initialTape, moveLeft, newState, newTape}}
+	return []trans{{initialState, initialTape, moveLeft, newState, newTape}}
 }
 
 func checkLeft(initialState state, initialTape tape, newState state) []trans {
