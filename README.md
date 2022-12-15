@@ -2,7 +2,7 @@
 Turing machine implementation in go language
 
 # tooling
-This program only uses the fmt package from the standard library
+This program only uses the fmt package from the standard library\n
 Note: a go mod file has to be created with `go mod init example.txt` to run this program
 
 # Sources
