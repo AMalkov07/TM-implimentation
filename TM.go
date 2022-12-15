@@ -165,26 +165,28 @@ func (t tm) accepting(inputString []tape) config {
 func (t tm) accepts(inputString []tape) bool {
 	for _, val := range t.final {
 		if val == t.start {
+			fmt.Println("true")
 			return true
 		}
 	}
 	x := t.accepting(inputString)
+	fmt.Println(x.currentState != t.start)
 	return x.currentState != t.start
 }
 
-func goRight(initialState state, initialTape tape, newTape tape, newState state) trans {
-	return trans{initialState, initialTape, moveRight, newState, newTape}
+func goRight(initialState state, initialTape tape, newTape tape, newState state) []trans {
+	return []trans{trans{initialState, initialTape, moveRight, newState, newTape}}
 }
 
-func checkRight(initialState state, initialTape tape, newState state) trans {
+func checkRight(initialState state, initialTape tape, newState state) []trans {
 	return goRight(initialState, initialTape, initialTape, newState)
 }
 
-func goLeft(initialState state, initialTape tape, newTape tape, newState state) trans {
-	return trans{initialState, initialTape, moveLeft, newState, newTape}
+func goLeft(initialState state, initialTape tape, newTape tape, newState state) []trans {
+	return []trans{trans{initialState, initialTape, moveLeft, newState, newTape}}
 }
 
-func checkLeft(initialState state, initialTape tape, newState state) trans {
+func checkLeft(initialState state, initialTape tape, newState state) []trans {
 	return goLeft(initialState, initialTape, initialTape, newState)
 }
 
@@ -204,37 +206,44 @@ func loopLeft(st state, tapes []tape) []trans {
 	return loop(moveLeft, st, tapes)
 }
 
+func combineArr(arr [][]trans) []trans {
+	output := []trans{}
+	for _, val := range arr {
+		output = append(output, val...)
+	}
+	return output
+}
+
 func main() {
-	transitions := []trans{}
-	transitions = append(transitions, checkRight(1, ' ', 6))
-	transitions = append(transitions, loopRight(1, []tape{'*'})...)
-	transitions = append(transitions, goRight(1, 'a', '*', 2))
-	transitions = append(transitions, goRight(1, 'a', '?', 3)) // added for testing
-	transitions = append(transitions, loopRight(2, []tape{'a', '*'})...)
-	transitions = append(transitions, goRight(2, 'b', '*', 3))
-	transitions = append(transitions, loopRight(3, []tape{'b', '*'})...)
-	transitions = append(transitions, goRight(3, 'c', '*', 4))
-	transitions = append(transitions, loopRight(4, []tape{'c', '*'})...)
-	transitions = append(transitions, checkLeft(4, ' ', 5))
-	transitions = append(transitions, loopLeft(5, []tape{'a', 'b', 'c', '*'})...)
-	transitions = append(transitions, checkRight(5, '!', 1))
-
+	transitionsarr := [][]trans{checkRight(1, ' ', 6),
+		loopRight(1, []tape{'*'}),
+		goRight(1, 'a', '*', 2),
+		loopRight(2, []tape{'a', '*'}),
+		goRight(2, 'b', '*', 3),
+		loopRight(3, []tape{'b', '*'}),
+		goRight(3, 'c', '*', 4),
+		loopRight(4, []tape{'c', '*'}),
+		checkLeft(4, ' ', 5),
+		loopLeft(5, []tape{'a', 'b', 'c', '*'}),
+		checkRight(5, '!', 1)}
+	transitions := combineArr(transitionsarr)
+	/*
+		transitions := []trans{}
+		transitions = append(transitions, checkRight(1, ' ', 6)...)
+		transitions = append(transitions, loopRight(1, []tape{'*'})...)
+		transitions = append(transitions, goRight(1, 'a', '*', 2)...)
+		//transitions = append(transitions, goRight(1, 'a', '?', 3)) // added for testing
+		transitions = append(transitions, loopRight(2, []tape{'a', '*'})...)
+		transitions = append(transitions, goRight(2, 'b', '*', 3)...)
+		transitions = append(transitions, loopRight(3, []tape{'b', '*'})...)
+		transitions = append(transitions, goRight(3, 'c', '*', 4)...)
+		transitions = append(transitions, loopRight(4, []tape{'c', '*'})...)
+		transitions = append(transitions, checkLeft(4, ' ', 5)...)
+		transitions = append(transitions, loopLeft(5, []tape{'a', 'b', 'c', '*'})...)
+		transitions = append(transitions, checkRight(5, '!', 1)...)
+	*/
 	tripletm := createTM([]state{1: 6}, []input{'a', 'b', 'c'}, []tape{'a', 'b', 'c', '*', '!', ' '}, ' ', '!', transitions, 1, []state{6})
-	//tripletm.showTM()
-	//x := tripletm.initialConfig([]tape{'a', 'a', 'b', 'b', 'c', 'c'})
-	//x.showConfig()
-
-	//ic := tripletm.initialConfig([]tape{'a', 'b', 'c'})
-	//fmt.Println(ic)
-	//uc := ic.updateConfig(2, '*', moveRight).updateConfig(3, 'b', moveRight).updateConfig(4, '*', moveRight)
-	//nc := tripletm.newConfig(ic)
-	//fmt.Println(nc)
-	x := tripletm.configs(35, []tape{'a', 'a', 'b', 'b', 'c', 'c'})
-	x.showHistory()
-	//x := tripletm.accepting([]tape{'a', 'b', 'c'})
-	//fmt.Println(tripletm.accepts([]tape{'a', 'b', 'c'}))
-	/*for _, val := range x {
-		fmt.Println(val)
-	}*/
-
+	tripletm.configs(35, []tape{'a', 'a', 'b', 'b', 'c', 'c'}).showHistory()
+	//x.showHistory()
+	//tripletm.accepts([]tape{'a', 'a', 'b', 'b', 'c', 'c', 'c'})
 }
