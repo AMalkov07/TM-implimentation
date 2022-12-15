@@ -213,37 +213,3 @@ func combineArr(arr [][]trans) []trans {
 	}
 	return output
 }
-
-func main() {
-	transitionsarr := [][]trans{checkRight(1, ' ', 6),
-		loopRight(1, []tape{'*'}),
-		goRight(1, 'a', '*', 2),
-		loopRight(2, []tape{'a', '*'}),
-		goRight(2, 'b', '*', 3),
-		loopRight(3, []tape{'b', '*'}),
-		goRight(3, 'c', '*', 4),
-		loopRight(4, []tape{'c', '*'}),
-		checkLeft(4, ' ', 5),
-		loopLeft(5, []tape{'a', 'b', 'c', '*'}),
-		checkRight(5, '!', 1)}
-	transitions := combineArr(transitionsarr)
-	/*
-		transitions := []trans{}
-		transitions = append(transitions, checkRight(1, ' ', 6)...)
-		transitions = append(transitions, loopRight(1, []tape{'*'})...)
-		transitions = append(transitions, goRight(1, 'a', '*', 2)...)
-		//transitions = append(transitions, goRight(1, 'a', '?', 3)) // added for testing
-		transitions = append(transitions, loopRight(2, []tape{'a', '*'})...)
-		transitions = append(transitions, goRight(2, 'b', '*', 3)...)
-		transitions = append(transitions, loopRight(3, []tape{'b', '*'})...)
-		transitions = append(transitions, goRight(3, 'c', '*', 4)...)
-		transitions = append(transitions, loopRight(4, []tape{'c', '*'})...)
-		transitions = append(transitions, checkLeft(4, ' ', 5)...)
-		transitions = append(transitions, loopLeft(5, []tape{'a', 'b', 'c', '*'})...)
-		transitions = append(transitions, checkRight(5, '!', 1)...)
-	*/
-	tripletm := createTM([]state{1: 6}, []input{'a', 'b', 'c'}, []tape{'a', 'b', 'c', '*', '!', ' '}, ' ', '!', transitions, 1, []state{6})
-	tripletm.configs(35, []tape{'a', 'a', 'b', 'b', 'c', 'c'}).showHistory()
-	//x.showHistory()
-	//tripletm.accepts([]tape{'a', 'a', 'b', 'b', 'c', 'c', 'c'})
-}
